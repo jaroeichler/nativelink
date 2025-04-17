@@ -504,5 +504,11 @@
         lre = import ./local-remote-execution/overlays/default.nix {inherit nix2container;};
         tools = import ./tools/public/default.nix {inherit nix2container;};
       };
+      templates = {
+        lre-cc = {
+          path = ./templates/lre-cc;
+          description = "A starter template for a C++ project.";
+        };
+      };
     };
 }

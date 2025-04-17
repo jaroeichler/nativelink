@@ -1,0 +1,8 @@
+bazel_dep(name = "rules_cc", version = "0.1.1")
+bazel_dep(name = "local-remote-execution", version = "0")
+archive_override(
+    module_name = "local-remote-execution",
+    integrity = "sha256-l6Oz8zX2+HEzwfvoevMJMqbJTVwfqmBVJ2gUFy0Qb0Y=",
+    strip_prefix = "nativelink-a5e845ce3d41832f158ecf91ab3598921ba5ae75/local-remote-execution",
+    urls = ["https://github.com/TraceMachina/nativelink/archive/a5e845ce3d41832f158ecf91ab3598921ba5ae75.zip"],
+)

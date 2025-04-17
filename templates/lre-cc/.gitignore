@@ -1,0 +1,5 @@
+bazel-*
+.direnv/
+local-remote-execution.bazelrc
+MODULE.bazel.lock
+.pre-commit-config.yaml
