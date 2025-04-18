@@ -342,6 +342,14 @@
             nativelink-worker-toolchain-buck2 = createWorker toolchain-buck2;
             nativelink-worker-buck2-toolchain = buck2-toolchain;
             image = nativelink-image;
+            pyroaring = pkgs.callPackage ./tools/buildstream/pyroaring.nix {pythonPkgs = pkgs.python312Packages;};
+            bst = pkgs.callPackage ./tools/buildstream/bst.nix {
+              inherit pkgs pyroaring;
+              pythonPkgs = pkgs.python312Packages;
+            };
+            buildstream-with-nativelink-test = pkgs.callPackage integration_tests/buildstream/buildstream-with-nativelink-test.nix {
+              inherit nativelink bst;
+            };
           }
           // (
             # It's not possible to crosscompile to darwin, not even between
@@ -373,7 +381,7 @@
             nightly-rust = pkgs.rust-bin.nightly.${pkgs.lre.nightly-rust.meta.version};
           };
         };
-        lre.settings = {
+        lre = {
           Env = with pkgs.lre;
             if pkgs.stdenv.isDarwin
             then lre-rs.meta.Env # C++ doesn't support Darwin yet.
@@ -383,7 +391,7 @@
             then "macos"
             else "linux";
         };
-        nixos.settings.path = with pkgs; [
+        nixos.path = with pkgs; [
           "/run/current-system/sw/bin"
           "${binutils.bintools}/bin"
           "${uutils-coreutils-noprefix}/bin"
@@ -462,7 +470,7 @@
               # development shell.
               ${config.pre-commit.installationScript}
 
-              # Generate lre.bazelrc which configures LRE toolchains when
+              # Generate local-remote-execution.bazelrc which configures LRE toolchains when
               # running in the nix environment.
               ${config.lre.installationScript}
 
@@ -470,12 +478,13 @@
               # to NativeLink's read-only cache.
               ${config.nativelink.installationScript}
 
-              # If on NixOS, generate nixos.bazelrc which adds the required
+              # If on NixOS, generate nixos.bazelrc, which adds the required
               # NixOS binary paths to the bazel environment.
-              if [ -e /etc/nixos ]; then
-                ${config.nixos.installationScript}
-                export CC=customClang
-              fi
+              ${config.nixos.installationScript}
+
+              # If on Darwin, generate darwin.bazelrc, which configures darwin
+              # libs and frameworks.
+              ${config.darwin.installationScript}
 
               # The Bazel and Cargo builds in nix require a Clang toolchain.
               # TODO(aaronmondal): The Bazel build currently uses the
@@ -488,11 +497,6 @@
               export PLAYWRIGHT_NODEJS_PATH=${pkgs.nodePackages_latest.nodejs}
               export PATH=$HOME/.deno/bin:$PATH
               deno types > web/platform/utils/deno.d.ts
-            ''
-            + pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
-              # On Darwin generate darwin.bazelrc which configures
-              # darwin libs & frameworks when running in the nix environment.
-              ${config.darwin.installationScript}
             ''
             # TODO(aaronmondal): Generalize this.
             + pkgs.lib.optionalString (system == "x86_64-linux") ''
