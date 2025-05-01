@@ -20,6 +20,7 @@ use nativelink_metric::{
     MetricFieldData, MetricKind, MetricPublishKnownKindData, MetricsComponent, group,
 };
 use nativelink_util::platform_properties::{PlatformProperties, PlatformPropertyValue};
+use tracing::info;
 
 /// Helps manage known properties and conversion into `PlatformPropertyValue`.
 #[derive(Debug)]
@@ -64,6 +65,25 @@ impl PlatformPropertyManager {
         &self,
         properties: HashMap<String, String>,
     ) -> Result<PlatformProperties, Error> {
+        // TODO(jaroeichler): Empty if no platform is explicitely given?
+        // i.e. automatically chooses
+        // `Target platform @@platforms//host:host: Selected execution platform @@platforms//host:host`
+        // during the build
+        info!("Properties lololol: {:#?}", properties);
+
+        // Check for host platform configuration with remote runner
+        if properties
+            .get("platform")
+            .is_some_and(|v| v == "@@platforms//host:host")
+            && properties.get("runner").is_some_and(|v| v == "remote")
+        {
+            return Err(make_input_err!(
+                "Invalid configuration: Cannot use host platform (@@platforms//host:host) with a remote runner. \
+                This combination is not supported because the remote execution environment \
+                differs from the host environment."
+            ));
+        }
+
         let mut platform_properties = HashMap::with_capacity(properties.len());
         for (key, value) in properties {
             let prop_value = self.make_prop_value(&key, &value)?;

@@ -20,10 +20,10 @@ patches:
 - patch: |-
     - op: replace
       path: /spec/url
-      value: https://github.com/TraceMachina/nativelink
+      value: https://github.com/jaroeichler/nativelink
     - op: replace
       path: /spec/ref/branch
-      value: main
+      value: warn-remote-as-host
   target:
     kind: GitRepository
     name: nativelink-infra
