@@ -68,6 +68,7 @@
           "container-image": "priority",
           "lre-rs": "priority",
           "ISA": "exact",
+          "InputRootAbsolutePath": "priority",
         }
       }
     }
@@ -80,23 +81,27 @@
     },
     "services": {
       "cas": [{
+        "instance_name": "projects/rbe-chromium-untrusted/instances/default_instance",
         "cas_store": "CAS_MAIN_STORE"
       }],
       "ac": [{
+        "instance_name": "projects/rbe-chromium-untrusted/instances/default_instance",
         "ac_store": "AC_MAIN_STORE"
       }],
       "capabilities": [{
+        "instance_name": "projects/rbe-chromium-untrusted/instances/default_instance",
         "remote_execution": {
           "scheduler": "MAIN_SCHEDULER"
         }
       }],
       "execution": [{
+        "instance_name": "projects/rbe-chromium-untrusted/instances/default_instance",
         "cas_store": "CAS_MAIN_STORE",
         "scheduler": "MAIN_SCHEDULER"
       }],
       "bytestream": {
         "cas_stores": {
-          "": "CAS_MAIN_STORE"
+          "projects/rbe-chromium-untrusted/instances/default_instance": "CAS_MAIN_STORE"
         }
       }
     }

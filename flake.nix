@@ -351,6 +351,8 @@
 
             default = nativelink;
 
+            chromium-dev = pkgs.callPackage ./tools/chromium-devshell.nix {};
+
             nativelink-worker-lre-cc = createWorker pkgs.lre.lre-cc.image;
             lre-java = pkgs.callPackage ./local-remote-execution/lre-java.nix {inherit buildImage;};
             rbe-autogen-lre-java = pkgs.rbe-autogen lre-java;
