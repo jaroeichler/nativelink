@@ -73,6 +73,18 @@
               details on local remote execution.
             '';
           };
+          chromium = {
+            path = ./templates/chromium;
+            description = "Remote execution with Siso for Chromium";
+            welcomeText = ''
+              # Getting started
+
+              Enter the Nix environment with `nix develop`.
+              Get your credentials for the NativeLink cloud on
+              https://app.nativelink.com/ and follow the instruction in the
+              README.
+            '';
+          };
         };
       };
       perSystem = {

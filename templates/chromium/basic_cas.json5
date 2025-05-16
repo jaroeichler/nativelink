@@ -1,0 +1,176 @@
+{
+  "stores": [
+    {
+      "name": "AC_MAIN_STORE",
+      "memory": {
+        // "content_path": "/tmp/nativelink/content_path-ac",
+        // "temp_path": "/tmp/nativelink/tmp_path-ac",
+        "eviction_policy": {
+          // 32gb.
+          "max_bytes": 32000000000
+        }
+      }
+    }, {
+      "name": "WORKER_FAST_SLOW_STORE",
+      "fast_slow": {
+        // "fast" must be a "filesystem" store because the worker uses it to make
+        // hardlinks on disk to a directory where the jobs are running.
+        "fast": {
+          "filesystem": {
+            "content_path": "/tmp/nativelink/content_path-cas",
+            "temp_path": "/tmp/nativelink/tmp_path-cas",
+            "eviction_policy": {
+              // 64gb.
+              "max_bytes": 64000000000
+            }
+          }
+        },
+        "slow": {
+          /// Discard data.
+          /// This example usage has the CAS and the Worker live in the same place,
+          /// so they share the same underlying CAS. Since workers require a fast_slow
+          /// store, we use the fast store as our primary data store, and the slow store
+          /// is just a noop, since there's no shared storage in this config.
+          "noop": {}
+        }
+      }
+    }
+  ],
+  "schedulers": [
+    {
+      "name": "MAIN_SCHEDULER",
+      "simple": {
+        "supported_platform_properties": {
+          "cpu_count": "minimum",
+          "disk_read_bps": "minimum",
+          "disk_read_iops": "minimum",
+          "disk_write_bps": "minimum",
+          "disk_write_iops": "minimum",
+          "gpu_count": "minimum",
+          "label:action_default": "minimum",
+          "label:action_large": "minimum",
+          "memory_kb": "minimum",
+          "network_kbps": "minimum",
+          "shm_size": "minimum",
+          "ISA": "exact",
+          "cpu_arch": "exact",
+          "cpu_model": "exact",
+          "cpu_vendor": "exact",
+          "gpu_model": "exact",
+          "kernel_version": "exact",
+          "InputRootAbsolutePath": "priority",
+          "OSFamily": "priority",
+          "container-image": "priority",
+          "lre-rs": "priority",
+        }
+      }
+    }
+  ],
+  "workers": [{
+    "local": {
+      "worker_api_endpoint": {
+        "uri": "grpc://127.0.0.1:50061"
+      },
+      "additional_environment": {
+        "PATH": {
+          "value": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        }
+      },
+      "cas_fast_slow_store": "WORKER_FAST_SLOW_STORE",
+      "upload_action_result": {
+        "ac_store": "AC_MAIN_STORE"
+      },
+      "work_directory": "/tmp/nativelink/work",
+      "platform_properties": {
+        "container-image": {
+          "values": [""]
+        },
+        "cpu_arch": {
+          "values": ["x86_64"]
+        },
+        "cpu_count": {
+          "values": ["16"]
+        },
+        "ISA": {
+          "values": ["x86-64"]
+        },
+        "InputRootAbsolutePath": {
+          "values": [""]
+        },
+        "label:action_default": {
+          "values": ["1"]
+        },
+        "label:action_large": {
+          "values": ["1"]
+        },
+        "lre-rs": {
+          "values": [""]
+        },
+        "memory_kb": {
+          "values": ["500000"]
+        },
+        "network_kbps": {
+          "values": ["100000"]
+        },
+        "OSFamily": {
+          "values": [""]
+        }
+      }
+    }
+  }],
+  "servers": [{
+    "name": "public",
+    "listener": {
+      "http": {
+        "socket_address": "0.0.0.0:50051"
+      }
+    },
+    "services": {
+      "cas": [{
+        "instance_name": "projects/rbe-chromium-untrusted/instances/default_instance",
+        "cas_store": "WORKER_FAST_SLOW_STORE"
+      }],
+      "ac": [{
+        "instance_name": "projects/rbe-chromium-untrusted/instances/default_instance",
+        "ac_store": "AC_MAIN_STORE"
+      }],
+      "execution": [{
+        "instance_name": "projects/rbe-chromium-untrusted/instances/default_instance",
+        "cas_store": "WORKER_FAST_SLOW_STORE",
+        "scheduler": "MAIN_SCHEDULER"
+      }],
+      "capabilities": [{
+        "instance_name": "projects/rbe-chromium-untrusted/instances/default_instance",
+        "remote_execution": {
+          "scheduler": "MAIN_SCHEDULER"
+        }
+      }],
+      "bytestream": {
+        "cas_stores": {
+          "projects/rbe-chromium-untrusted/instances/default_instance": "WORKER_FAST_SLOW_STORE"
+        }
+      }
+    }
+  }, {
+    "name": "private_workers_servers",
+    "listener": {
+      "http": {
+        "socket_address": "0.0.0.0:50061"
+      }
+    },
+    "services": {
+      // Note: This should be served on a different port, because it has
+      // a different permission set than the other services.
+      // In other words, this service is a backend api. The ones above
+      // are a frontend api.
+      "worker_api": {
+        "scheduler": "MAIN_SCHEDULER"
+      },
+      "admin": {},
+      "health": {}
+    }
+  }],
+  "global": {
+    "max_open_files": 24576
+  }
+}

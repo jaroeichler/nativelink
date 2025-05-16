@@ -7,6 +7,8 @@ on the NativeLink cloud:
   Currently restricted to Linux.
   See [Local Remote Execution](https://www.nativelink.com/docs/explanations/lre)
   for further details.
+- **`chromium`**:
+  Build Chromium with Siso using remote execution and caching with NativeLink.
 
 # Getting started
 
