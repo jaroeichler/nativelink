@@ -117,6 +117,14 @@ const filesToConvert: ConvertFileType[] = [
       description: "Bazel Config",
     },
   },
+  {
+    input: `${rootDir}/templates/chromium/README.md`,
+    output: `${docsDir}/rbe/templates-chromium.mdx`,
+    docs: {
+      title: "Chromium Config",
+      description: "Chromium Config",
+    },
+  },
 ];
 
 filesToConvert.map((file) => {
